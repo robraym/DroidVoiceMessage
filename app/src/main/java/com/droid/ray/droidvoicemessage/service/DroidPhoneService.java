@@ -11,9 +11,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 import com.droid.ray.droidvoicemessage.activity.MainActivity;
 import com.droid.ray.droidvoicemessage.common.DroidCommon;
@@ -60,10 +60,10 @@ public class DroidPhoneService extends Service {
     }
 
     @Override
-    public void onStart(Intent intent, int startId) {
-        super.onStart(intent, startId);
+    public int onStartCommand(Intent intent, int flags, int startId) {
         IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
         registerReceiver(phoneReceiver, filter);
+        return START_STICKY;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class DroidPhoneService extends Service {
                 String message= "";
                 switch (state) {
                     case 0:
-                        if ( DroidPreferences.GetString(context, "foneOuvido") == "1") {
+                        if ("1".equals(DroidPreferences.GetString(context, "foneOuvido"))) {
                             DroidPreferences.SetString(context, "foneOuvido", "0");
                             DroidCommon.ShowListener(context);
                             message = "Fone de ouvido desconectado";
@@ -151,7 +151,7 @@ public class DroidPhoneService extends Service {
                 message = "Disconectano o dispositivo bluetouch";
                 break;
             case BluetoothHeadset.STATE_DISCONNECTED:
-                if ( DroidPreferences.GetString(context, "foneBlueTouch") == "1") {
+                if ("1".equals(DroidPreferences.GetString(context, "foneBlueTouch"))) {
                     DroidPreferences.SetString(context, "foneBlueTouch", "0");
                     DroidCommon.ShowListener(context);
                     message = "Dispositivo bluetouch desconectado";

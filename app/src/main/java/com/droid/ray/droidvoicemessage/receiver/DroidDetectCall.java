@@ -90,7 +90,7 @@ public class DroidDetectCall extends BroadcastReceiver {
         }
         lastState = state;
         Log.d(TAG, "onReceiver - onCallStateChanged");
-        if (DroidCommon.inCall == false) {
+        if (!DroidCommon.inCall) {
             DroidCommon.EnviaMsg(context);
         }
     }

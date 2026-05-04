@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#000000</color>
-    <color name="colorPrimaryDark">#000000</color>
-    <color name="colorAccent">#FFFFFF</color>
+    <color name="colorPrimary">#11131A</color>
+    <color name="colorPrimaryDark">#11131A</color>
+    <color name="colorAccent">#4285F4</color>
+    <color name="oneUiBackground">#11131A</color>
+    <color name="oneUiSurface">#1A1D26</color>
+    <color name="oneUiSurfacePressed">#1F2A44</color>
+    <color name="oneUiTextPrimary">#F3F6FB</color>
+    <color name="oneUiTextSecondary">#A7B0C0</color>
+    <color name="oneUiSection">#4285F4</color>
+    <color name="oneUiStroke">#26FFFFFF</color>
+    <color name="oneUiIconBlue">#4285F4</color>
+    <color name="oneUiIconGreen">#33C27F</color>
+    <color name="oneUiIconAmber">#F5B544</color>
 </resources>

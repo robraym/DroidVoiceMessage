@@ -1,18 +1,12 @@
 package com.droid.ray.droidvoicemessage.activity;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.os.Build;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.widget.CompoundButtonCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
-import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.droid.ray.droidvoicemessage.R;
 import com.droid.ray.droidvoicemessage.common.DroidCommon;
@@ -28,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
-            context = getBaseContext();
+            context = this;
             DroidCommon.forceBreak = true;
             DroidCommon.forceBreak = false;
             setContentView(R.layout.activity_main);
@@ -40,6 +34,22 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (Exception ex) {
             Log.d(TAG, "onCreate: " + ex.getMessage());
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            if (context == null) {
+                context = this;
+            }
+            if (DroidCommon.AskPermissionGrand(this, getApplicationContext())) {
+                DroidCommon.getAllContact(context);
+                DroidCommon.ShowLayout(context, (ViewGroup) findViewById(R.id.layout_id));
+            }
+        } catch (Exception ex) {
+            Log.d(TAG, "onResume: " + ex.getMessage());
         }
     }
 

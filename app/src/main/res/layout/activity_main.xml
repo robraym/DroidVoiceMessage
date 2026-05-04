@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/colorPrimary"
+    android:background="@color/oneUiBackground"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="25dp"
+    android:layout_height="match_parent"
     tools:context="com.droid.ray.droidvoicemessage.activity.MainActivity">
 
     <include
-        layout="@layout/content_main"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp" />
+        layout="@layout/content_main" />
 
-</LinearLayout>
+</FrameLayout>
