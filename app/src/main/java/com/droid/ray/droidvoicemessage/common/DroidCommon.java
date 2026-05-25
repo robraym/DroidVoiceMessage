@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -39,6 +38,7 @@ import com.droid.ray.droidvoicemessage.service.DroidPhoneService;
 import com.droid.ray.droidvoicemessage.tts.DroidTTS;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -275,26 +275,15 @@ public class DroidCommon {
         Iterator iterator2 = set2.iterator();
         while (iterator2.hasNext()) {
             Map.Entry key = (Map.Entry) iterator2.next();
+            if (hasContacts) {
+                contactsCard.addView(createDivider(context));
+            }
             hasContacts = true;
-            CheckBox ch = new CheckBox(context);
-            if (Build.VERSION.SDK_INT < 21) {
-                CompoundButtonCompat.setButtonTintList(ch, ColorStateList.valueOf(context.getResources().getColor(R.color.oneUiIconGreen)));
-            } else {
-                ch.setButtonTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.oneUiIconGreen)));
-            }
-            ch.setTextColor(context.getResources().getColor(R.color.oneUiTextPrimary));
-            contextCommon = context;
-            ch.setText(key.getKey().toString());
-            ch.setOnClickListener(getOnClickCheckBox(ch));
-            ch.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-            ch.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
-            ch.setPadding(0, dp(context, 12), 0, dp(context, 12));
-
-            if (key.getValue().equals("S")) {
-                ch.setChecked(true);
-            }
-
-            contactsCard.addView(createContactRow(context, ch));
+            contactsCard.addView(createContactRow(
+                    context,
+                    key.getKey().toString(),
+                    key.getValue().equals("S")
+            ));
         }
 
         if (!hasContacts) {
@@ -416,20 +405,69 @@ public class DroidCommon {
         return section;
     }
 
-    private static LinearLayout createContactRow(Context context, CheckBox checkBox) {
+    private static LinearLayout createContactRow(Context context, String contactName, boolean isChecked) {
         LinearLayout row = new LinearLayout(context);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setMinimumHeight(dp(context, 52));
+        row.setPadding(0, dp(context, 4), 0, dp(context, 4));
+        row.setClickable(true);
+        row.setFocusable(true);
 
-        TextView icon = createCircularIcon(context, "\uD83D\uDC64", R.color.oneUiIconGreen);
-        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(dp(context, 40), dp(context, 40));
-        iconParams.rightMargin = dp(context, 14);
-        row.addView(icon, iconParams);
+        TextView name = new TextView(context);
+        name.setText(contactName);
+        name.setTextColor(context.getResources().getColor(R.color.oneUiTextPrimary));
+        name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        name.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        name.setSingleLine(false);
+        row.addView(name, new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+        ));
 
-        LinearLayout.LayoutParams checkParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        row.addView(checkBox, checkParams);
+        final CheckBox checkBox = new CheckBox(context);
+        if (Build.VERSION.SDK_INT < 21) {
+            CompoundButtonCompat.setButtonTintList(checkBox, ColorStateList.valueOf(context.getResources().getColor(R.color.oneUiIconGreen)));
+        } else {
+            checkBox.setButtonTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.oneUiIconGreen)));
+        }
+        checkBox.setText("");
+        checkBox.setChecked(isChecked);
+        checkBox.setPadding(dp(context, 12), 0, 0, 0);
+        checkBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DroidPreferences.SetString(contextCommon, contactName, checkBox.isChecked() ? "S" : "N");
+            }
+        });
+        row.addView(checkBox, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
+
+        row.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                checkBox.setChecked(!checkBox.isChecked());
+                DroidPreferences.SetString(contextCommon, contactName, checkBox.isChecked() ? "S" : "N");
+            }
+        });
 
         return row;
+    }
+
+    private static View createDivider(Context context) {
+        View divider = new View(context);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(context, 1)
+        );
+        params.topMargin = dp(context, 4);
+        params.bottomMargin = dp(context, 4);
+        divider.setLayoutParams(params);
+        divider.setBackgroundColor(context.getResources().getColor(R.color.oneUiStroke));
+        return divider;
     }
 
     private static TextView createCircularIcon(Context context, String text, int colorRes) {
@@ -523,69 +561,106 @@ public class DroidCommon {
     }
 
     public static void getAllContact(Context context) {
-
         try {
-            //This class provides applications access to the content model.
             ContentResolver cr = context.getContentResolver();
+            HashSet<String> contactIds = getWhatsappContactIds(cr);
 
-//RowContacts for filter Account Types
-            Cursor contactCursor = cr.query(
-                    ContactsContract.RawContacts.CONTENT_URI,
-                    new String[]{ContactsContract.RawContacts._ID,
-                            ContactsContract.RawContacts.CONTACT_ID},
-                    ContactsContract.RawContacts.ACCOUNT_TYPE + "= ?",
-                    new String[]{"com.whatsapp"},
-                    null);
-
-//ArrayList for Store Whatsapp Contact
-            ArrayList<String> myWhatsappContacts = new ArrayList<>();
-
-            if (contactCursor != null) {
-                if (contactCursor.getCount() > 0) {
-                    if (contactCursor.moveToFirst()) {
-                        do {
-                            //whatsappContactId for get Number,Name,Id ect... from  ContactsContract.CommonDataKinds.Phone
-                            String whatsappContactId = contactCursor.getString(contactCursor.getColumnIndexOrThrow(ContactsContract.RawContacts.CONTACT_ID));
-
-                            if (whatsappContactId != null) {
-                                //Get Data from ContactsContract.CommonDataKinds.Phone of Specific CONTACT_ID
-                                Cursor whatsAppContactCursor = cr.query(
-                                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                                        new String[]{ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-                                                ContactsContract.CommonDataKinds.Phone.NUMBER,
-                                                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME},
-                                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                                        new String[]{whatsappContactId}, null);
-
-                                if (whatsAppContactCursor != null) {
-                                    whatsAppContactCursor.moveToFirst();
-                                    String name = whatsAppContactCursor.getString(whatsAppContactCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                                    String number = whatsAppContactCursor.getString(whatsAppContactCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
-
-                                    whatsAppContactCursor.close();
-
-                                    //Add Number to ArrayList
-                                    myWhatsappContacts.add(number);
-
-                                    if (DroidPreferences.GetString(context, name).equals("")) {
-                                        DroidPreferences.SetString(context, name, "N");
-                                    }
-
-                                    Log.d(TAG, "WhatsApp contact name " + name);
-                                    Log.d(TAG, " WhatsApp contact number :  " + number);
-                                }
-                            }
-                        } while (contactCursor.moveToNext());
-                        contactCursor.close();
-                    }
-                }
+            if (contactIds.size() > 0) {
+                loadPhoneContacts(context, cr, contactIds);
+            } else {
+                loadPhoneContacts(context, cr, null);
             }
-
-            Log.d(TAG, " WhatsApp contact size :  " + myWhatsappContacts.size());
-
         } catch (Exception ex) {
             Log.d(TAG, " erro getContact:  " + ex.getMessage());
         }
+    }
+
+    private static HashSet<String> getWhatsappContactIds(ContentResolver cr) {
+        HashSet<String> contactIds = new HashSet<>();
+        Cursor cursor = null;
+
+        try {
+            cursor = cr.query(
+                    ContactsContract.Data.CONTENT_URI,
+                    new String[]{ContactsContract.Data.CONTACT_ID},
+                    ContactsContract.Data.MIMETYPE + " LIKE ?",
+                    new String[]{"%whatsapp%"},
+                    null
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    String contactId = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Data.CONTACT_ID));
+                    if (!TextUtils.isEmpty(contactId)) {
+                        contactIds.add(contactId);
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception ex) {
+            Log.d(TAG, " erro getWhatsappContactIds: " + ex.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        Log.d(TAG, " WhatsApp contact id size : " + contactIds.size());
+        return contactIds;
+    }
+
+    private static void loadPhoneContacts(Context context, ContentResolver cr, HashSet<String> allowedContactIds) {
+        Cursor cursor = null;
+        int contactSize = 0;
+
+        try {
+            String selection = null;
+            String[] selectionArgs = null;
+
+            if (allowedContactIds != null && allowedContactIds.size() > 0) {
+                StringBuilder placeholders = new StringBuilder();
+                selectionArgs = new String[allowedContactIds.size()];
+                int index = 0;
+                for (String contactId : allowedContactIds) {
+                    if (index > 0) {
+                        placeholders.append(",");
+                    }
+                    placeholders.append("?");
+                    selectionArgs[index] = contactId;
+                    index++;
+                }
+                selection = ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " IN (" + placeholders + ")";
+            }
+
+            cursor = cr.query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    new String[]{
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                    },
+                    selection,
+                    selectionArgs,
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC"
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    String name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                    if (!TextUtils.isEmpty(name) && DroidPreferences.GetString(context, name).equals("")) {
+                        DroidPreferences.SetString(context, name, "N");
+                        contactSize++;
+                        Log.d(TAG, "WhatsApp contact name " + name);
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception ex) {
+            Log.d(TAG, " erro loadPhoneContacts: " + ex.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        Log.d(TAG, " WhatsApp contact size : " + contactSize);
     }
 
     public static boolean AskPermissionGrand(Activity activity, Context appContext) {

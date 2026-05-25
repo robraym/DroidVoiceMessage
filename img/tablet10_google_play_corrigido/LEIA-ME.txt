@@ -1,0 +1,7 @@
+Imagens corrigidas para Google Play Console - Tablet 10 polegadas
+
+Todas as imagens estão em 1920 x 1080 px.
+Proporção: 16:9.
+Formato: JPG.
+Cada lado está dentro da exigência de 1080 a 7680 px.
+Cada arquivo está abaixo de 8 MB.
