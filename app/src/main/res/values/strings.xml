@@ -1,10 +1,18 @@
 <resources>
-    <string name="app_name">Voice Message</string>
+    <string name="app_name">Voice</string>
     <string name="vm_header_title">Leitura de mensagens</string>
-    <string name="vm_header_summary">Configure a leitura automática no WhatsApp.</string>
+    <string name="vm_header_summary">Marque quem pode acionar a leitura em voz alta.</string>
     <string name="vm_notifications_title">Ler notificações</string>
     <string name="vm_notifications_summary">Ative ou desative a leitura automática das mensagens do WhatsApp.</string>
     <string name="vm_contacts_title">Escolher contatos</string>
     <string name="vm_contacts_summary">Selecione quem pode acionar a leitura.</string>
     <string name="vm_contacts_empty">Nenhum contato do WhatsApp encontrado.</string>
+    <string name="vm_contacts_group_count_one">%1$d contato</string>
+    <string name="vm_contacts_group_count_many">%1$d contatos</string>
+    <string name="vm_contacts_unknown_group_count_one">Contato não salvo</string>
+    <string name="vm_contacts_unknown_group_count_many">Contatos não salvos</string>
+    <string name="vm_remove_contact_title">Remover contato</string>
+    <string name="vm_remove_contact_message">Remover %1$s da lista de leitura?</string>
+    <string name="vm_dialog_cancel">Cancelar</string>
+    <string name="vm_dialog_remove">Remover</string>
 </resources>

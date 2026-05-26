@@ -33,6 +33,7 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     private static final int FOREGROUND_NOTIFICATION_ID = 2001;
     public static TextToSpeech tts;
     private Context context;
+    private boolean ttsReady = false;
 
 
     @Nullable
@@ -45,17 +46,8 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     @Override
     public void onInit(int i) {
         Log.d(TAG, "onInit ");
-        if (!DroidCommon.LoopingNotification && !tts.isSpeaking()) {
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        LoopingNotification();
-                    } catch (Exception ex) {
-                        Log.d(TAG, "Init: " + ex.getMessage());
-                    }
-                }
-            }).start();
-        }
+        ttsReady = true;
+        StartLoopIfNeeded();
     }
 
     @Override
@@ -69,31 +61,48 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStart ");
+        StartLoopIfNeeded();
         return START_NOT_STICKY;
+    }
+
+    private void StartLoopIfNeeded() {
+        if (!ttsReady || DroidCommon.LoopingNotification || tts == null || tts.isSpeaking() || !DroidCommon.HasPendingNotifications()) {
+            return;
+        }
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    LoopingNotification();
+                } catch (Exception ex) {
+                    Log.d(TAG, "StartLoopIfNeeded: " + ex.getMessage());
+                }
+            }
+        }).start();
     }
 
     private void LoopingNotification() {
         try {
             DroidCommon.LoopingNotification = true;
             ShowNotification();
-            ArrayList<String> mensagens = new ArrayList<>();
-            mensagens.addAll(DroidCommon.Notification);
-            for (String str : mensagens) {
-                Speak(str);
-                DroidCommon.RemoveNotification(str);
-                DroidCommon.TimeSleep(1000);
-                //DroidCommon.InCall();
-                if (DroidCommon.inCall || DroidCommon.forceBreak) break;
-            }
-            if (DroidCommon.AllNotification.size() > 200) {
-                DroidCommon.AllNotification.clear();
-                if (mensagens != null) {
-                    DroidCommon.AllNotification.addAll(mensagens);
+            while (DroidCommon.HasPendingNotifications()) {
+                ArrayList<String> mensagens = DroidCommon.GetPendingNotificationsSnapshot();
+                for (String str : mensagens) {
+                    if (DroidCommon.inCall || DroidCommon.forceBreak) {
+                        return;
+                    }
+
+                    Speak(str);
+                    DroidCommon.RemoveNotification(str);
+                    DroidCommon.TimeSleep(500);
                 }
             }
             ShowNotification();
         } finally {
             DroidCommon.LoopingNotification = false;
+            if (!DroidCommon.HasPendingNotifications() || DroidCommon.inCall || DroidCommon.forceBreak) {
+                stopSelf();
+            }
         }
 
     }
@@ -153,7 +162,7 @@ public class DroidTTS extends Service implements TextToSpeech.OnInitListener {
 
     private static void ShowNotification() {
         Log.d(TAG, "--------------------------------------------");
-        for (String str : DroidCommon.Notification) {
+        for (String str : DroidCommon.GetPendingNotificationsSnapshot()) {
             Log.d(TAG, "ShowNotification: " + str);
         }
     }

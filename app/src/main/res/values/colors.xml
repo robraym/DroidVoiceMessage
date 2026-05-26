@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#11131A</color>
-    <color name="colorPrimaryDark">#11131A</color>
-    <color name="colorAccent">#4285F4</color>
-    <color name="oneUiBackground">#11131A</color>
-    <color name="oneUiSurface">#1A1D26</color>
-    <color name="oneUiSurfacePressed">#1F2A44</color>
-    <color name="oneUiTextPrimary">#F3F6FB</color>
-    <color name="oneUiTextSecondary">#A7B0C0</color>
-    <color name="oneUiSection">#4285F4</color>
-    <color name="oneUiStroke">#26FFFFFF</color>
-    <color name="oneUiIconBlue">#4285F4</color>
-    <color name="oneUiIconGreen">#33C27F</color>
+    <color name="colorPrimary">#050507</color>
+    <color name="colorPrimaryDark">#050507</color>
+    <color name="colorAccent">#3D8BFF</color>
+    <color name="oneUiBackground">#050507</color>
+    <color name="oneUiSurface">#1B1C20</color>
+    <color name="oneUiSurfacePressed">#202B3F</color>
+    <color name="oneUiTextPrimary">#F7F8FA</color>
+    <color name="oneUiTextSecondary">#AEB4C1</color>
+    <color name="oneUiSection">#3D8BFF</color>
+    <color name="oneUiStroke">#1FFFFFFF</color>
+    <color name="oneUiIconBlue">#3D8BFF</color>
+    <color name="oneUiIconGreen">#36D17D</color>
     <color name="oneUiIconAmber">#F5B544</color>
 </resources>

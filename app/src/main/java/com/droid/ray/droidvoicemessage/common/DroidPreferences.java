@@ -35,6 +35,13 @@ public class DroidPreferences {
         editor.commit();
     }
 
+    public static void RemoveString(Context context, String chave) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_ID, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(chave);
+        editor.commit();
+    }
+
     public static String GetString(Context context, String chave) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_ID, 0);
         String i = sharedPreferences.getString(chave, "");
